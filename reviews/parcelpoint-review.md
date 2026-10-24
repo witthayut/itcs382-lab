@@ -1,0 +1,26 @@
+Files read: `Locker.java`, `Main.java`, `Parcel.java`, `ParcelService.java` — all Java files under `parcelpoint/src/main/java`.
+
+| No. | Check | Code location (file:line) | Finding | Severity (Must fix, Should fix or Note) | Suggested fix |
+|---|---|---|---|---|---|
+| 1 | 1 | `ParcelService.java:42` | `parcel.getCode() == code` compares String references rather than their contents, so pickup can fail for matching codes entered separately. | Must fix | Compare the codes using `equals()`. |
+| 2 | 1 | `ParcelService.java:76–79` | The `FileWriter` is never closed, so buffered CSV data may not be written completely and the file resource remains open. | Must fix | Manage the writer with try-with-resources. |
+| 3 | 1 | `ParcelService.java:80–81` | The empty `IOException` handler silently hides file-saving failures while callers continue as though saving succeeded. | Must fix | Report the failure or propagate it to the caller. |
+| 4 | 1 | `Main.java:11–17` | Command arguments are indexed and parsed without validation: `store` can cause `ArrayIndexOutOfBoundsException`, and `pickup P1 abc` can cause `NumberFormatException`, terminating the program. | Must fix | Check argument counts and handle invalid numbers before invoking service operations. |
+| 5 | 1 | `Main.java:11` | Splitting on one literal space creates empty arguments when users enter repeated spaces, causing otherwise understandable commands to fail. | Should fix | Ignore blank input and split nonblank commands using `\\s+`. |
+| 6 | 1 | `Main.java:8` | The `Scanner` is never closed; because it wraps shared `System.in`, closing it also closes standard input. | Note | Use try-with-resources if this entry point owns standard input for the application lifetime. |
+| 7 | 1 | `ParcelService.java:6` | The `java.util.Date` import is unused. | Should fix | Remove the unused import. |
+| 8 | 1 | `ParcelService.java:12` | `maxParcels` is initialized but never read, so it imposes no capacity limit. | Should fix | Remove the unused field unless a documented capacity requirement needs it. |
+| 9 | 1 | `Main.java:13`; `Parcel.java:9–12`; `ParcelService.java:26,56–61` | Parcel size is not checked against the advertised range 1–3: size `0` can be stored, and the fee method treats every size other than 1 or 2 as large. | Should fix | Reject sizes outside 1–3 when constructing a parcel. |
+| 10 | 2 | `Main.java:6–25` | **Logical method cohesion:** `main` groups different command activities—store, pickup, listing, and staff reporting—selected by command text. | Note | Extract command handlers and keep `main` focused on input and dispatch. |
+| 11 | 2 | `ParcelService.java:64–71` | **Logical method cohesion:** `printParcels` combines a staff report and a waiting-parcel report, selected by a flag. | Should fix | Split the two reports into explicitly named operations. |
+| 12 | 2 | `ParcelService.java:24–81` | **Weak class cohesion:** the service combines locker allocation, pickup rules, fee calculation, notification output, report formatting, and CSV persistence. | Should fix | Start by extracting CSV persistence into a separate repository class. |
+| 13 | 2 | `Main.java:19,21`; `ParcelService.java:64–68` | **Control coupling:** `Main` passes a boolean that tells the service which reporting behaviour to execute. | Should fix | Replace the flag with separate report operations. |
+| 14 | 2 | `ParcelService.java:46,52–58` | **Stamp coupling:** `pickUp` passes a whole `Parcel` to `fee`, although the method reads only its size; `fee` also does not use service attributes. | Should fix | Change the fee operation to accept only the size and days it needs. |
+| 15 | 2 | `Parcel.java:7`; `ParcelService.java:28,44,67–68,78` | **Content coupling and exposed state:** `status` is public, and the service directly reads and writes another class’s representation, bypassing validation. | Should fix | Make status private and expose controlled status operations and a read accessor. |
+| 16 | 2 | `ParcelService.java:20–21`; `Main.java:22` | **Representation exposure:** `getLockers()` returns the mutable internal list, allowing callers to add, remove, or clear service-owned lockers; `Main` only needs a free-locker count. | Should fix | Expose a free-locker count operation instead of returning the internal list. |
+| 17 | 2 | `Locker.java:5,8`; `Parcel.java:6,9`; `Main.java:9,13`; `ParcelService.java:15–17,26,56–61` | **Connascence of convention:** several classes must agree that size codes 1, 2, and 3 mean small, medium, and large, and that their numeric ordering represents capacity. | Should fix | Introduce a shared size enum with an explicit capacity comparison. |
+| 18 | 2 | `Parcel.java:13`; `ParcelService.java:28,44,68` | **Connascence of convention:** `Parcel` and the service coordinate lifecycle state using unrestricted strings such as `"NEW"`, `"STORED"`, and `"PICKED_UP"`. | Should fix | Represent lifecycle states with a shared enum. |
+| 19 | 2 | `Main.java:13`; `Parcel.java:9–11` | **Connascence of position:** the constructor accepts consecutive String arguments for code and student ID, so swapping them compiles but assigns the wrong meanings. | Note | Use distinct value types for parcel codes and student IDs to make swapped arguments detectable. |
+
+**Check 1: 9 findings.**  
+**Check 2: 10 findings.**
