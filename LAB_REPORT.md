@@ -88,27 +88,52 @@ Table 2. All findings on the starter code
 2.3 Name one AI finding that was wrong or too vague, and explain why. If every finding was right, explain how you checked them.
 
 Row 16 (Main.java:8, Scanner never closed) was too vague. The AI said to close it but also warned that closing it closes System.in, and it never said whether that matters here. I checked Main.java myself. Only main reads input and the program ends after the loop, so closing it is safe.
+
 ## Task 3. Fix and check
 
 Table 3. What you did with each SonarQube issue in Table 1
 
 | No. in Table 1 | Fixed or kept | Commit, or the reason for keeping it |
 | --- | --- | --- |
-| 1 | | |
+| 1 | Fixed | 182450c |
+| 2 | Fixed | 182450c |
+| 3 | Fixed | 0ee290c |
+| 4 | Kept | Printing the SMS message to the console is how this program simulates sending an SMS, and there is no real SMS service. |
+| 5 | Fixed | 0fdf727 |
+| 6 | Kept | printParcels prints the staff report that the staff command asks for, so console output is the intended result. |
+| 7 | Kept | printParcels prints the waiting list that the list command asks for, so console output is the intended result. |
+| 8 | Fixed | 8074078 |
+| 9 | Fixed | be03407 |
+| 10 | Kept | Printing in Main is the output of a command-line program. |
+| 11 | Kept | Printing in Main is the output of a command-line program. |
+| 12 | Kept | Printing in Main is the output of a command-line program. |
+| 13 | Kept | Printing in Main is the output of a command-line program. |
 
-Number of SonarQube issues that remain after your fixes:
+Number of SonarQube issues that remain after your fixes: 7
 
 The two design problems that you fixed
 
 | Design problem (course term) | What you changed | Commit |
 | --- | --- | --- |
-| | | |
-| | | |
+| Control coupling: Main passed a boolean flag to printParcels(boolean forStaff) to choose the report (Table 2 row 21) | Split printParcels into printWaitingParcels() and printStaffReport(), and Main now calls the one it needs | 197a5bc |
+| Connascence of convention: Parcel, Locker, ParcelService and Main all had to read the size codes 1, 2 and 3 the same way (Table 2 row 25) | Added a Size enum (SMALL, MEDIUM, LARGE) that holds each daily rate; Parcel and Locker store a Size, fee() uses the rate from the enum, and Main converts the typed number once with Size.fromNumber() | 1043455 |
 
 Output of the program after your fixes, for the commands `store P1 6501 2`, `pickup P1 5` and `staff`, and the content of parcels.csv:
 
 ```text
+Commands: store <code> <studentId> <size 1-3>, pickup <code> <days>, list, staff, quit
+store P1 6501 2
+SMS to 6501: parcel P1 is in locker 2
+Locker 2
+pickup P1 5
+Fee: 30.0
+staff
+P1 6501 PICKED_UP
+Free lockers: 3
+quit
 
+parcels.csv:
+P1,PICKED_UP
 ```
 
 ## Task 4. AI-generated poor and good designs
