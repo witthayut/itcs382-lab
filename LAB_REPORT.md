@@ -1,16 +1,16 @@
 # Lab Report, Code Quality and Design Quality
 
-Repository URL:
+Repository URL: https://github.com/witthayut/itcs382-lab
 
 ## Tools
 
 | Item | Version or name |
 | --- | --- |
-| JDK | |
-| Maven | |
-| IDE | |
-| SonarQube for IDE | |
-| AI tool and exact model | |
+| JDK | Temurin 25.0.4.1+1 |
+| Maven | 3.10.0 |
+| IDE | Visual Studio Code 1.143.1 |
+| SonarQube for IDE | 6.2.0 |
+| AI tool and exact model | ChatGPT, GPT-6.1 Sol (prompts A, B and C, and a second opinion on drafts); Claude, claude-opus-5-5 (guidance and suggestions) |
 
 ## Task 1. SonarQube on the starter code
 
@@ -140,33 +140,46 @@ P1,PICKED_UP
 
 | Item | bikeshare-poor | bikeshare-good |
 | --- | --- | --- |
-| Date | | |
-| AI tool and exact model | | |
-| Prompt (B or C as given, or your changed prompt in full) | | |
-| Builds with mvn package (yes or no) | | |
-| Number of classes, interfaces, enums and records | | |
-| SonarQube issues, total | | |
-| SonarQube issues, by rule | | |
-| AI review findings in Check 1 | | |
-| AI review findings in Check 2 | | |
-| Review output file in the reviews folder | | |
+| Date | 2026-10-25 | 2026-10-25 |
+| AI tool and exact model | ChatGPT, GPT-6.1 Sol | ChatGPT, GPT-6.1 Sol |
+| Prompt (B or C as given, or your changed prompt in full) | B as given | C as given |
+| Builds with mvn package (yes or no) | yes | yes |
+| Number of classes, interfaces, enums and records | 1 class | 5 classes, 1 interface, 2 enums, 2 records (Rental is a private record inside BikeShareService) |
+| SonarQube issues, total | 16 | 2 |
+| SonarQube issues, by rule | java:S106 ×7, java:S2386 ×5, java:S3776 ×2, java:S135 ×1, java:S9358 ×1 | java:S106 ×1, java:S135 ×1 |
+| AI review findings in Check 1 | 1 | 0 |
+| AI review findings in Check 2 | 8 | 4 |
+| Review output file in the reviews folder | reviews/bikeshare-poor-review.md | reviews/bikeshare-good-review.md |
 
 4.1 Did SonarQube report any cohesion or coupling problem in bikeshare-poor? Quote the rule and the message if it did.
 
+Not directly. In my results no SonarQube rule was named after cohesion or coupling. The closest were java:S2386 "Make this member "protected"" on the public static arrays, which are global shared data that any class could change, and java:S3776 "Refactor this method to reduce its Cognitive Complexity from 28 to the 15 allowed", which comes from process() doing too many jobs. In this lab SonarQube pointed at these symptoms but did not use the course terms.
+
 4.2 Did the AI review tell the two versions apart? Give one finding for bikeshare-poor that does not appear for bikeshare-good.
 
+Yes. It gave 8 design findings for the poor version and 4 for the good version. For example, only the poor review reports weak class cohesion: "Main represents the command-line interface, bike inventory, active rentals, pricing rules, and CSV storage in one class" (Main.java:11–161).
+
 4.3 Which version would you rather extend with a new member type, such as a visitor who pays 4 baht per minute, and why?
+
+bikeshare-good. I would add VISITOR(4) to the MemberType enum and update the help text in ConsoleMenu, and parsing, fees and the CSV would work without other changes. In bikeshare-poor I would have to add a new int code 3 and change the type parsing (Main.java:104–111), the fee line (Main.java:141) and the help text, and the fee line treats every type except 1 as staff, so a missed change would silently charge visitors 3 baht.
 
 ## Task 5. Reflection
 
 5.1 What does SonarQube check, and what does it not check? Answer with examples from this lab.
 
+SonarQube found small code mistakes, like using == for Strings, a file that was never closed and unused code. In this lab it did not find the design problems, like the boolean flag or the size numbers 1, 2 and 3.
+
 5.2 When should you not trust the AI review? Give an example from this lab.
 
+I should not trust it when the answer depends on something it did not check. For the Scanner, it said "close it if Main owns the input" but did not say if that was true, so I had to check the code myself.
+
 5.3 What will you do differently in Project Phase 2 after this lab?
+
+I will run SonarQube and the AI review while we build, not only at the end. I will use enums instead of number codes and separate methods instead of boolean flags. I will also check any AI code before we commit it.
 
 ## AI usage declaration
 
 | AI tool and exact model | Purpose | Files or parts that it produced or changed | How you checked its output |
 | --- | --- | --- | --- |
-| | | | |
+| ChatGPT, GPT-6.1 Sol | Prompt A reviews (Tasks 2 and 4), Prompts B and C (Task 4); second opinion on my draft answers | The 3 review files in reviews/; all files in bikeshare-poor and bikeshare-good | Opened the code at every line it cited; built and ran both BikeShare programs and compared their fees |
+| Claude, claude-opus-5-5 | Guidance through the lab steps; suggested wording and code that I reviewed | Suggested wording for Table 2, Table 3 and Tasks 4-5, which I shortened and edited; the Size enum code for design fix 2, which I chose; saved the ChatGPT answers into files | Compared Table 2 with the code and SonarQube; ran the program after every fix and checked the output and parcels.csv; checked that SonarQube still showed 7 issues |
