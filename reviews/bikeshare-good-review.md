@@ -1,0 +1,12 @@
+Files read: `BikeInventory.java`, `BikeShareService.java`, `CompletedRide.java`, `ConsoleMenu.java`, `CsvRideRepository.java`, `Main.java`, `MemberType.java`, `RideRepository.java`, `Station.java` — all Java files under `bikeshare-good/src/main/java`.
+
+| No. | Check | Code location (file:line) | Finding | Severity (Must fix, Should fix or Note) | Suggested fix |
+|---|---|---|---|---|---|
+| 1 | 2 | `ConsoleMenu.java:56–68` | **Logical method cohesion:** `execute` groups rental and return handling, selecting an activity using the command token; this is localized to the menu dispatcher. | Note | Keep the dispatcher limited to routing commands to the separate handlers. |
+| 2 | 2 | `BikeShareService.java:38–58`; `ConsoleMenu.java:88–90`; `CompletedRide.java:3–9` | **Stamp coupling:** the service returns a six-component `CompletedRide`, but the menu uses only bike ID, minutes, and fee, making it depend on a larger data structure than it needs. | Note | Return a small receipt value containing only bike ID, minutes, and fee if the UI contract needs to be separated from the stored ride. |
+| 3 | 2 | `ConsoleMenu.java:72–75,84–85`; `CsvRideRepository.java:25,27`; `MemberType.java:4–5`; `Station.java:4–6` | **Connascence of name/convention:** command parsing uses enum constant names through `valueOf`, and CSV storage uses those names through `name()`, so renaming a constant changes accepted input and persisted values. | Should fix | Give each enum an explicit stable external value and use it for parsing and serialization. |
+| 4 | 2 | `BikeShareService.java:51–53`; `CompletedRide.java:3–9` | **Connascence of position:** the service must supply record constructor arguments in the declared order; member ID and bike ID are both Strings, so swapping those values compiles but produces an incorrect ride record. | Note | Use distinct member-ID and bike-ID value types if compile-time protection against swapping them is needed. |
+
+**Check 1: 0 findings — not found.** No resource leaks, incorrect object comparisons, unused imports or fields, empty exception handlers, excessive repeated string literals, or clearly overlong/complex methods were identified.
+
+**Check 2: 4 findings.** Weak class cohesion, control/common/content coupling between application classes, excessive class dependencies, exposed mutable fields, and operations returning internal collections: **not found**. Record component fields are implicitly private and final; enum constants do not expose mutable state.
